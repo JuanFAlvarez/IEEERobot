@@ -2,6 +2,7 @@
 Repository for our IEEE Robot project.
 
 __What is the IEEE Robot?__
+
 The IEEE Robot is a project to create a smart robot that is able to interact with people and its environment. 
 It will act as our club's mascot and also represent our abilities and hard work.
 We will take it with us to fundraising locations in order to recruit members and showcase what we do as a team.
