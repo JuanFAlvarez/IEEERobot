@@ -23,3 +23,9 @@ Movement|Ethan, Mayra, Rob, Juan|This team is in charge of all mechanically movi
 Display & Web|Raul, Juan|This team is in charge of displaying the appropriate videos or images corresponding to an action within the robot's own embedded screen. Things it will display include our Instagram feed, recruitment video and weather.
 
 3D Design|Aram, Rob|This team is in charge of designing the shell of our robot. They will design how the robot will look on the outside.
+
+
+First Header | Second Header
+------------ | -------------
+Content from cell 1 | Content from cell 2
+Content in the first column | Content in the second column
