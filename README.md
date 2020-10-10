@@ -8,6 +8,7 @@ It will act as our club's mascot and also represent our abilities and hard work.
 We will take it with us to fundraising locations in order to recruit members and showcase what we do as a team.
 
 **Project page**:
+
 https://jfalvarezschool.wixsite.com/website/wi-fi-sumo-bots-copy
 
 
