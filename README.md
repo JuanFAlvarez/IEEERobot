@@ -11,8 +11,8 @@ https://jfalvarezschool.wixsite.com/website/wi-fi-sumo-bots-copy
 
 
 **Current teams**:
-Team | Members|Description
------------- | -------------|-------------
+Team | Members | Description
+--- | --- | ---
 
 Machine Learning | Mayra, Amado, Marky, Juan | This team will be in charge of setting up and testing speech recognition and object detection on the robot.
 
