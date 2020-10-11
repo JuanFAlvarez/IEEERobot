@@ -25,6 +25,7 @@ Can not be more than 3.3V.
 
 
 **Setup Directions:**
+
 Setting "config" file
 For Raspberry System: After burning official system(not only RASPBIAN system, other system like ubuntu, Kali is also same), please keep the TF card connecting your computer and open TF card root, find file named “config” Open the “config” file and copy the following code in the end of the file, then save.
 
