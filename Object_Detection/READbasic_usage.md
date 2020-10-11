@@ -46,11 +46,17 @@ where --modeldir=Sample_TFLite_model specifies the subdirectory of our model fil
 **Considerations for python code**
 
 -Multiple distinct objects detected
+
 -Have a priority of objects detected
+
 	ex: Person and phone both detected choose which to focus on
+	
 -Pause detection after a person is identified and action is started 
+
 -Action for each detection
+
 -Avoiding looping of actions if person or object detected remains in frame
+
 -False positives/negatives
 
 
