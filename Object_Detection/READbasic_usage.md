@@ -34,7 +34,7 @@ https://docs.python.org/3/tutorial/venv.html
 python3 TFLite_mayra.py --modeldir=Sample_TFLite_model
 ```
 
-run python3 script called "TFLite_mayra.py" with arguments --modeldir=Sample_TFLite_model
+runs python3 script called "TFLite_mayra.py" with arguments --modeldir=Sample_TFLite_model
 where --modeldir=Sample_TFLite_model specifies the subdirectory of our model files 
 
 
