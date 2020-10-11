@@ -1,6 +1,7 @@
 
 **Shell script**
 
+These are located in /home/pi
 
 Using your shell script(.sh), you can launch the same three lines each time to test any changes made to your python script(.py)
 ```
