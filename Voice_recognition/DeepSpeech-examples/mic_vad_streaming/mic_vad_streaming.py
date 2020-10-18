@@ -13,7 +13,7 @@ import serial
 #sets arduino port with 9600 baud rate
 arduinoSerialData=serial.Serial('/dev/ttyACM0',9600)
 
-#defining greeting lists
+#defining greeting lists (to add  as dictionary)
 greethi=["hello","hi","howdy","hey"]
 greetbye=["by","bye"]
 greethifi=["five"]
