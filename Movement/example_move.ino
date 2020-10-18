@@ -1,9 +1,9 @@
-//left motor
+//left motor pins
 
 const int a1=2;
 const int a2=3;
 
-//right motor
+//right motor pins 
 
 const int b1=4;
 const int b2=5;
