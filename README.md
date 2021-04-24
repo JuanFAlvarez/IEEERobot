@@ -15,7 +15,7 @@ https://jfalvarezschool.wixsite.com/website/wi-fi-sumo-bots-copy
 **Current teams**:
 Team | Members | Description
 | --- | --- | --- |
-| Machine Learning | M Amado, Juan A.| This team will be in charge of setting up and testing speech recognition and object detection on the robot. |
+| Machine Learning | Amado, Juan A.| This team will be in charge of setting up and testing speech recognition and object detection on the robot. |
 | Power Management | Juan A. | This team is in charge of designing a power system to ensure our robot has a long enough life during our events. |
 | Movement |  Juan A. | This team is in charge of all mechanically moving parts of the robot which includes the tracks and any arms. |
 | Display & Web | Juan A. | This team is in charge of displaying the appropriate videos or images corresponding to an action within the robot's own embedded screen. Things it will display include our Instagram feed, recruitment video and weather. |
