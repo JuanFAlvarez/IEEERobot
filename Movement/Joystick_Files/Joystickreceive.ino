@@ -1,10 +1,10 @@
 #include <esp_now.h>
 #include <WiFi.h>
-//This is for the joystick to be used as sender
+//This is for the joystick to be used as receiver
 
 /// ESPNOW SETUP /////////////////////////////////////////////////////////////////////////////////
 
-// REPLACE WITH THE MAC Address of your receiver 
+// REPLACE WITH THE MAC Address of your receiver
 uint8_t broadcastAddress[] = {0x08, 0x3A, 0xF2, 0x7B, 0xFC, 0x34};
 
 // Variable to store if sending data was successful
@@ -14,7 +14,7 @@ String success;
 // Must mach the receiver structure
 typedef struct struct_message {
 
- // Left and right values for x and y
+  // Left and right values for x and y
   int LX;
   int LY;
   int RX;
@@ -49,10 +49,10 @@ esp_now_peer_info_t peerInfo;
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
   Serial.print("\r\nLast Packet Send Status:\t");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
-  if (status ==0){
+  if (status == 0) {
     success = "Delivery Success :)";
   }
-  else{
+  else {
     success = "Delivery Fail :(";
   }
 }
@@ -69,7 +69,7 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   incomingLB = incomingReadings.LB;
   incomingRB = incomingReadings.RB;
   Serial.println("incmoing lx, ly, rx,ry,lb,rb");
-  
+
 
 }
 
@@ -86,7 +86,7 @@ const int a2 = 18;
 // Motor 2
 const int EN2 = 15;
 const int b1 = 2;
-const int b2 =4;
+const int b2 = 4;
 
 // setting PWM properties
 const int freq = 5000;
@@ -106,14 +106,14 @@ const int sped = 255;
 int LEFT_X = 0;
 int LEFT_Y = 0;
 int RIGHT_X = 0;
-int RIGHT_Y =0;
+int RIGHT_Y = 0;
 int LBUTTON = HIGH;
 int RBUTTON = HIGH;
 
 
 void setup() {
 
-// setup PWM 
+  // setup PWM
   ledcSetup(motorchannel, freq, resolution);
 
   //attach channel to the GPIO to be controlled
@@ -130,7 +130,7 @@ void setup() {
 
   Serial.begin(115200);
 
-  
+
   // Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
 
@@ -143,14 +143,14 @@ void setup() {
   // Once ESPNow is successfully Init, we will register for Send CB to
   // get the status of Trasnmitted packet
   esp_now_register_send_cb(OnDataSent);
-  
+
   // Register peer
   memcpy(peerInfo.peer_addr, broadcastAddress, 6);
-  peerInfo.channel = 0;  
+  peerInfo.channel = 0;
   peerInfo.encrypt = false;
-  
-  // Add peer        
-  if (esp_now_add_peer(&peerInfo) != ESP_OK){
+
+  // Add peer
+  if (esp_now_add_peer(&peerInfo) != ESP_OK) {
     Serial.println("Failed to add peer");
     return;
   }
@@ -176,13 +176,22 @@ void loop() {
   Serial.print("\t RBUTTON: ");
   Serial.println(RBUTTON);
 
-  if (incomingLX>1800){
-  fwd();}
-  else{
+  if (incomingLB == LOW) {
+    turn1();
+  }
+
+  else if (incomingRB == LOW) {
+    turn2();
+  }
+  else if (incomingLX > 2650) {
+    fwd();
+  }
+  else if (incomingLX < 1600) {
     reverse();
   }
-  delay(500);
-
+  else {
+    brake();
+  }
 
 
 }
