@@ -257,6 +257,32 @@ void loop() {
 
   Serial.println(distanceInch);
   Serial.println(distanceCm);
+
+
+
+  // Initialize BNO055
+  sensors_event_t orientationData , linearAccelData;
+
+
+  bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
+  //  bno.getEvent(&angVelData, Adafruit_BNO055::VECTOR_GYROSCOPE);
+  bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
+
+  xPos = xPos + ACCEL_POS_TRANSITION * linearAccelData.acceleration.x;
+  yPos = yPos + ACCEL_POS_TRANSITION * linearAccelData.acceleration.y;
+
+  // velocity of sensor in the direction it's facing
+  headingVel = ACCEL_VEL_TRANSITION * linearAccelData.acceleration.x / cos(DEG_2_RAD * orientationData.orientation.x);
+
+  // Poll BNO055
+  while ((micros() - tStart) < (BNO055_SAMPLERATE_DELAY_MS * 1000))
+  {
+    //poll until the next sample is ready
+  }
+
+
+
+
   if (distanceInch < 10.0) {
     turn1();
     delay(2000);
@@ -418,5 +444,40 @@ void turnTo(int dir, int cur_h) {
   Serial.println("Braking");
   brake();
 }
+void move_left() {
+  Serial.print("TurningLeft");
+  turnTo(left, cur_h = orientationData.orientation.x);
+  Serial.print("MovingLeft");
+  fwd();
+  delay(2000);
+  brake();
+}
 
+
+void move_right() {
+  Serial.print("Turning right");
+  turnTo(right, cur_h = orientationData.orientation.x);
+  Serial.print("Moving right");
+  fwd();
+  delay(2000);
+  brake();
+}
+
+void move_up() {
+  Serial.print("Turning up");
+  turnTo(up, cur_h = orientationData.orientation.x);
+  Serial.print("Moving up");
+  fwd();
+  delay(2000);
+  brake();
+}
+
+void move_down() {
+  Serial.print("Turning down");
+  turnTo(down, cur_h = orientationData.orientation.x);
+  Serial.print("Moving down");
+  fwd();
+  delay(2000);
+  brake();
+}
 
