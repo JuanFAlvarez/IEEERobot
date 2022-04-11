@@ -1,6 +1,23 @@
 #include <esp_now.h>
 #include <WiFi.h>
+#include <Adafruit_PWMServoDriver.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
+
 //This is for the joystick to be used as receiver
+
+
+
+// Ultrasonic sensor setup
+const int trigPin = 12;
+const int echoPin = 14;
+
+#define SOUND_SPEED 0.034
+#define CM_TO_INCH 0.393701
+long duration;
+float distanceCm;
+float distanceInch;
+
 
 /// ESPNOW SETUP /////////////////////////////////////////////////////////////////////////////////
 
@@ -111,6 +128,31 @@ int LBUTTON = HIGH;
 int RBUTTON = HIGH;
 
 
+
+
+///////////////////////////////////// Absolute orientation sensor setup //////////////////////////////////////////
+// current heading and sensor events
+int cur_h = 0;
+volatile sensors_event_t orientationData , linearAccelData;
+
+
+//heading and sampling variables and constants
+double xPos = 0, yPos = 0, headingVel = 0;
+uint16_t BNO055_SAMPLERATE_DELAY_MS = 10; //how often to read data from the board
+uint16_t PRINT_DELAY_MS = 500; // how often to print the data
+uint16_t printCount = 0; //counter to avoid printing every 10MS sample
+//velocity = accel*dt (dt in seconds)
+//position = 0.5*accel*dt^2
+double ACCEL_VEL_TRANSITION =  (double)(BNO055_SAMPLERATE_DELAY_MS) / 1000.0;
+double ACCEL_POS_TRANSITION = 0.5 * ACCEL_VEL_TRANSITION * ACCEL_VEL_TRANSITION;
+double DEG_2_RAD = 0.01745329251; //trig functions require radians, BNO055 outputs degrees
+// Check I2C device address and correct line below (by default address is 0x29 or 0x28)
+//                                   id, address
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
+
+
+
+
 void setup() {
 
   // setup PWM
@@ -156,6 +198,11 @@ void setup() {
   }
   // Register for a callback function that will be called when data is received
   esp_now_register_recv_cb(OnDataRecv);
+
+
+  // Set up ultrasonic sensor pins
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
 }
 
 void loop() {
@@ -176,22 +223,49 @@ void loop() {
   Serial.print("\t RBUTTON: ");
   Serial.println(RBUTTON);
 
-  if (incomingLB == LOW) {
-    turn1();
-  }
+  //  if (incomingLB == LOW) {
+  //    turn1();
+  //  }
+  //
+  //  else if (incomingRB == LOW) {
+  //    turn2();
+  //  }
+  //  else if (incomingLX > 2650) {
+  //    fwd();
+  //  }
+  //  else if (incomingLX < 1600) {
+  //    reverse();
+  //  }
+  //  else {
+  //    brake();
+  //  }
 
-  else if (incomingRB == LOW) {
-    turn2();
-  }
-  else if (incomingLX > 2650) {
-    fwd();
-  }
-  else if (incomingLX < 1600) {
-    reverse();
+  // Clear trigPin
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  // Turn HIGH for 10 us
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Reads the echoPin, returns microseconds
+  duration = pulseIn(echoPin, HIGH);
+  // Calculate distance
+  distanceCm = duration * SOUND_SPEED / 2;
+  // Convert to inches
+  distanceInch = distanceCm * CM_TO_INCH;
+
+  Serial.println(distanceInch);
+  Serial.println(distanceCm);
+  if (distanceInch < 10.0) {
+    turn1();
+    delay(2000);
   }
   else {
-    brake();
+    fwd();
   }
+
+
 
 
 }
@@ -240,6 +314,109 @@ void turn2() {
   ledcWrite(motorchannel, sped);
 }
 
+/********************************************** Essential functions for path following ********************************************************/
 
+
+// print x y and z
+void printEvent(sensors_event_t* event) {
+  Serial.println();
+  Serial.print(event->type);
+  double x = -1000000, y = -1000000 , z = -1000000; //dumb values, easy to spot problem
+  if (event->type == SENSOR_TYPE_ACCELEROMETER) {
+    x = event->acceleration.x;
+    y = event->acceleration.y;
+    z = event->acceleration.z;
+  }
+  else if (event->type == SENSOR_TYPE_ORIENTATION) {
+    x = event->orientation.x;
+    y = event->orientation.y;
+    z = event->orientation.z;
+  }
+  else if (event->type == SENSOR_TYPE_MAGNETIC_FIELD) {
+    x = event->magnetic.x;
+    y = event->magnetic.y;
+    z = event->magnetic.z;
+  }
+  else if ((event->type == SENSOR_TYPE_GYROSCOPE) || (event->type == SENSOR_TYPE_ROTATION_VECTOR)) {
+    x = event->gyro.x;
+    y = event->gyro.y;
+    z = event->gyro.z;
+  }
+
+  Serial.print(": x= ");
+  Serial.print(x);
+  Serial.print(" | y= ");
+  Serial.print(y);
+  Serial.print(" | z= ");
+  Serial.println(z);
+}
+
+
+// rotate to the position LEFT RIGHT UP DOWN
+void turnTo(int dir, int cur_h) {
+  sensors_event_t orientationData , linearAccelData;
+
+  int rotdir;
+  //define upper and lower bounds
+  //define cur_h as int in the void turnTo
+  int upbound = dir + 5;
+  int lowbound = dir - 5;
+  //get orientation event to read angle
+  bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
+  //get current angle from orientation event
+  cur_h = orientationData.orientation.x;
+
+  int delthet = cur_h - dir;
+
+
+  if (delthet < 0) {
+    delthet += 360;
+  }
+
+  if (delthet <= 180) {
+    rotdir = 1;
+  }
+  else {
+    rotdir = 0;
+  }
+  if (dir != up) {
+    //move if cur_h is greater than highest threshold or lower than lowest threshold
+    while (cur_h > upbound || cur_h < lowbound) {
+      Serial.println("rotating CCW");
+      Serial.println("Current Angle is: ");
+      Serial.println(cur_h);
+      if (rotdir == 0) {
+        turn1();
+      }
+      else {
+        turn2();
+      }
+      bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
+      cur_h = orientationData.orientation.x;
+    }
+  }
+
+  //dir is up
+  else {
+    //move if cur_h is greater than 5 AND less than 355 aka 0-355
+    while (cur_h > 5 && cur_h < 355) {
+      Serial.println("rotating CCW");
+      Serial.println("Current Angle is: ");
+      Serial.println(cur_h);
+      if (rotdir == 0) {
+        turn1();
+      }
+      else {
+        turn2();
+      }
+      bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
+      cur_h = orientationData.orientation.x;
+
+    }
+  }
+  //after breaking out of either loop it should brake
+  Serial.println("Braking");
+  brake();
+}
 
 
