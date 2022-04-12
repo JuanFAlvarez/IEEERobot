@@ -276,7 +276,7 @@ void loop() {
     Serial.println(distanceInch);
       cur_h = orientationData.orientation.x;
       if ((cur_h-90) <= 0||(cur_h-90) >= 360){
-        cur_h = 359; 
+        cur_h = 360; 
       }
       Serial.println("moving to:");
       Serial.println(cur_h-90);
