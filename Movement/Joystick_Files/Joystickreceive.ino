@@ -7,6 +7,7 @@
 //This is for the joystick to be used as receiver
 
 
+// Ultrasonic setup /////////////////////////////////////////////////////////////////////////////////////////
 
 // Ultrasonic sensor setup
 const int trigPin = 12;
@@ -91,9 +92,9 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
 }
 
 
-///////////////////////////////////////////////////////////
+// H-bridge pin set up /////////////////////////////////////////////////////////////////////////////
 
-// H-bridge pin set up
+
 
 // Motor 1
 const int EN1 = 5;
@@ -109,15 +110,7 @@ const int b2 = 4;
 const int freq = 5000;
 const int motorchannel = 0;
 const int resolution = 8;
-
 const int sped = 255;
-
-
-
-
-
-
-
 
 // Variables to store values
 int LEFT_X = 0;
@@ -127,14 +120,10 @@ int RIGHT_Y = 0;
 int LBUTTON = HIGH;
 int RBUTTON = HIGH;
 
-
-
-
 ///////////////////////////////////// Absolute orientation sensor setup //////////////////////////////////////////
 // current heading and sensor events
 int cur_h = 0;
 volatile sensors_event_t orientationData , linearAccelData;
-
 
 //heading and sampling variables and constants
 double xPos = 0, yPos = 0, headingVel = 0;
@@ -150,9 +139,6 @@ double DEG_2_RAD = 0.01745329251; //trig functions require radians, BNO055 outpu
 //                                   id, address
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
-
-
-
 void setup() {
 
   // setup PWM
@@ -167,11 +153,7 @@ void setup() {
   pinMode(a2, OUTPUT);
   pinMode(b1, OUTPUT);
   pinMode(b2, OUTPUT);
-
-
-
   Serial.begin(115200);
-
 
   // Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
@@ -203,11 +185,24 @@ void setup() {
   // Set up ultrasonic sensor pins
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
+
+
+  if (!bno.begin())
+  {
+    Serial.print("No BNO055 detected");
+    while (1);
+  }
+  delay(1000);
+
 }
 
+// Heading angles for magnetometer
+int left = 270;
+int right = 90;
+int down = 180;
+int up = 360;
+
 void loop() {
-
-
 
   // Write all values to structur
   Serial.print("Left_X: ");
@@ -254,15 +249,12 @@ void loop() {
   distanceCm = duration * SOUND_SPEED / 2;
   // Convert to inches
   distanceInch = distanceCm * CM_TO_INCH;
-
   Serial.println(distanceInch);
   Serial.println(distanceCm);
 
-
-
   // Initialize BNO055
   sensors_event_t orientationData , linearAccelData;
-
+  unsigned long tStart = micros();
 
   bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
   //  bno.getEvent(&angVelData, Adafruit_BNO055::VECTOR_GYROSCOPE);
@@ -275,25 +267,26 @@ void loop() {
   headingVel = ACCEL_VEL_TRANSITION * linearAccelData.acceleration.x / cos(DEG_2_RAD * orientationData.orientation.x);
 
   // Poll BNO055
-  while ((micros() - tStart) < (BNO055_SAMPLERATE_DELAY_MS * 1000))
+  while ((micros() - tStart) < (BNO055_SAMPLERATE_DELAY_MS * 1000));
   {
     //poll until the next sample is ready
   }
 
-
-
-
   if (distanceInch < 10.0) {
-    turn1();
-    delay(2000);
+    Serial.println(distanceInch);
+      cur_h = orientationData.orientation.x;
+      if ((cur_h-90) <= 0||(cur_h-90) >= 360){
+        cur_h = 359; 
+      }
+      Serial.println("moving to:");
+      Serial.println(cur_h-90);
+    turnTo(cur_h-90, cur_h = orientationData.orientation.x);
+    delay(1000);
+    cur_h = orientationData.orientation.x;
   }
   else {
     fwd();
   }
-
-
-
-
 }
 
 
