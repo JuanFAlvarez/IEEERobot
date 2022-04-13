@@ -7,10 +7,10 @@ The IEEE Robot is a project to create a smart robot that is able to interact wit
 It will act as our club's mascot and also represent our abilities and hard work.
 We will take it with us to fundraising locations in order to recruit members and showcase what we do as a team.
 
-**Project page**:
+**Project task pages**:
 
-https://jfalvarezschool.wixsite.com/website/wi-fi-sumo-bots-copy
-
+https://trello.com/b/TjVhrWJO/software-hardware-development
+https://trello.com/b/hC0c54LR/electrical-design
 
 **Current teams**:
 Team | Members | Description
